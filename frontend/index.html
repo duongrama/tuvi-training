@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#C9A962">
+    <link rel="apple-touch-icon" href="/icon-192.png">
+    <title>Tử Vi - Lá Số</title>
+    <meta property="og:title" content="Tử Vi — Bói Toán AI">
+    <meta property="og:description" content="Lá số tử vi · 12 cung mệnh · Đại hạn · Tiểu hạn. Miễn phí.">
+    <meta property="og:image" content="/static/img/og-card.png">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="vi_VN">
+    <script defer src="https://unpkg.com/marked/marked.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/tuvi.css?v=59">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="/shared/favicon.ico">
+
+    <!-- SEO-2: JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Tử Vi — Lá Số Tử Vi AI",
+      "description": "Xem lá số tử vi theo thuật toán truyền thống chính xác. Phân tích 12 cung mệnh miễn phí.",
+      "url": "https://boitoan.vn/tu-vi",
+      "applicationCategory": "LifestyleApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "VND"
+      }
+    }
+    </script>
+    <link rel="stylesheet" href="/shared/css/a11y.css">
+</head>
+<body>
+    <a href="#main-content" class="skip-link" data-i18n="tv.skip_link">Bỏ qua đến nội dung chính</a>
+    <div class="chart-container">
+
+        <!-- Header -->
+        <div class="page-header">
+            <button type="button" class="btn-sidebar-toggle" onclick="toggleSidebar()" title="Lịch sử" data-i18n-title="tv.history_button">☰</button>
+            <button type="button" style="background:none;border:none;cursor:pointer;font-size:1.4rem;color:var(--gold);" onclick="openProfileModal()" title="Hồ sơ cá nhân">👤</button>
+        </div>
+
+        <!-- TV-FP-1: Daily Fortune Card -->
+        <div class="daily-fortune-card" id="daily-fortune-card">
+            <div class="daily-header" onclick="toggleDailyCard()">
+                <span class="daily-title">✦ Vận Hạn Hôm Nay</span>
+                <div class="daily-header-right">
+                    <span class="daily-streak hidden" id="daily-streak"></span>
+                    <span class="daily-palace hidden" id="daily-palace"></span>
+                    <span class="daily-chevron" id="daily-chevron">▲</span>
+                </div>
+            </div>
+            <div class="daily-body" id="daily-fortune-body">
+                <div class="daily-loading"><span></span><span></span><span></span></div>
+            </div>
+        </div>
+
+        <!-- TV-FP-3: Push Opt-in Banner -->
+        <div class="push-optin-banner hidden" id="push-optin-banner">
+            <span class="push-optin-text">🔔 Nhận vận hạn hàng ngày?</span>
+            <div class="push-optin-actions">
+                <button type="button" class="btn-push-yes" onclick="subscribePush()">Có</button>
+                <button type="button" class="btn-push-no" onclick="dismissPush()">Không</button>
+            </div>
+        </div>
+
+        <div style="position:relative;">
+            <h1 class="page-title" data-i18n="tv.title">Tử Vi Lá Số</h1>
+            <p class="page-subtitle" data-i18n="tv.subtitle">Xem cung mệnh · vận hạn · tài lộc</p>
+            <div class="lang-switcher" style="position:absolute;top:0;right:0;">
+                <button type="button" onclick="window.switchLocale && switchLocale('vi')" style="background:none;border:none;cursor:pointer;font-size:1.1rem;" title="Tiếng Việt">🇻🇳</button>
+                <button type="button" onclick="window.switchLocale && switchLocale('en')" style="background:none;border:none;cursor:pointer;font-size:1.1rem;opacity:0.5;" title="English">🇬🇧</button>
+            </div>
+        </div>
+
+        <!-- Edit info button (shown after first submit) -->
+        <button type="button" class="btn-edit-info" id="btn-edit-info" onclick="expandForm()">✎ Sửa thông tin</button>
+
+        <!-- Input Form — R1 -->
+        <div class="form-container" id="form-container">
+            <!-- Ornament -->
+            <div class="form-ornament">✦ Nhập Thông Tin Sinh ✦</div>
+
+            <form id="tuvi-form">
+                <!-- Date inputs: Day / Month / Year -->
+                <div class="date-inputs-row">
+                    <div class="date-field">
+                        <input type="number" id="day" class="date-input" placeholder="15" min="1" max="31" required autocomplete="off">
+                        <span class="date-label">Ngày</span>
+                    </div>
+                    <div class="date-field">
+                        <input type="number" id="month" class="date-input" placeholder="3" min="1" max="12" required autocomplete="off">
+                        <span class="date-label">Tháng</span>
+                    </div>
+                    <div class="date-field">
+                        <input type="number" id="year" class="date-input" placeholder="1990" min="1900" max="2100" required autocomplete="off" style="max-width:120px;">
+                        <span class="date-label">Năm</span>
+                    </div>
+                </div>
+
+                <!-- Hidden hour & minute (set by Địa Chi buttons) -->
+                <input type="number" id="hour" value="0" style="display:none;">
+                <input type="number" id="minute" value="0" style="display:none;">
+
+                <!-- Địa Chi hour buttons -->
+                <p class="hour-section-label">Giờ sinh (Địa Chi)</p>
+                <div class="diachi-grid">
+                    <button type="button" class="diachi-hour-btn selected" data-hour="0"  onclick="selectHour(this)"><span class="diachi-name">Tý</span><span class="diachi-range">23:00–01:00</span></button>
+                    <button type="button" class="diachi-hour-btn"          data-hour="2"  onclick="selectHour(this)"><span class="diachi-name">Sửu</span><span class="diachi-range">01:00–03:00</span></button>
+                    <button type="button" class="diachi-hour-btn"          data-hour="4"  onclick="selectHour(this)"><span class="diachi-name">Dần</span><span class="diachi-range">03:00–05:00</span></button>
+                    <button type="button" class="diachi-hour-btn"          data-hour="6"  onclick="selectHour(this)"><span class="diachi-name">Mão</span><span class="diachi-range">05:00–07:00</span></button>
+                    <button type="button" class="diachi-hour-btn"          data-hour="8"  onclick="selectHour(this)"><span class="diachi-name">Thìn</span><span class="diachi-range">07:00–09:00</span></button>
+                    <button type="button" class="diachi-hour-btn"          data-hour="10" onclick="selectHour(this)"><span class="diachi-name">Tỵ</span><span class="diachi-range">09:00–11:00</span></button>
+                    <button type="button" class="diachi-hour-btn"          data-hour="12" onclick="selectHour(this)"><span class="diachi-name">Ngọ</span><span class="diachi-range">11:00–13:00</span></button>
+                    <button type="button" class="diachi-hour-btn"          data-hour="14" onclick="selectHour(this)"><span class="diachi-name">Mùi</span><span class="diachi-range">13:00–15:00</span></button>
+                    <button type="button" class="diachi-hour-btn"          data-hour="16" onclick="selectHour(this)"><span class="diachi-name">Thân</span><span class="diachi-range">15:00–17:00</span></button>
+                    <button type="button" class="diachi-hour-btn"          data-hour="18" onclick="selectHour(this)"><span class="diachi-name">Dậu</span><span class="diachi-range">17:00–19:00</span></button>
+                    <button type="button" class="diachi-hour-btn"          data-hour="20" onclick="selectHour(this)"><span class="diachi-name">Tuất</span><span class="diachi-range">19:00–21:00</span></button>
+                    <button type="button" class="diachi-hour-btn"          data-hour="22" onclick="selectHour(this)"><span class="diachi-name">Hợi</span><span class="diachi-range">21:00–23:00</span></button>
+                </div>
+
+                <!-- Năm xem -->
+                <p class="gender-section-label">Năm xem lá số</p>
+                <div class="date-row">
+                    <div class="date-field">
+                        <input type="number" id="nam_xem" class="date-input" min="1900" max="2200" autocomplete="off" style="max-width:120px;">
+                        <span class="date-label">Năm</span>
+                    </div>
+                </div>
+
+                <!-- Gender pills -->
+                <p class="gender-section-label">Giới tính</p>
+                <div class="gender-pills">
+                    <button type="button" class="gender-pill selected" id="pill-nam" onclick="selectGender('nam')">☉ Nam</button>
+                    <button type="button" class="gender-pill"          id="pill-nu"  onclick="selectGender('nu')">☽ Nữ</button>
+                </div>
+                <!-- Hidden native radio (for form reading) -->
+                <input type="radio" name="gender" value="nam" checked class="gender-radio-hidden" id="gender-nam">
+                <input type="radio" name="gender" value="nu"  class="gender-radio-hidden" id="gender-nu">
+
+                <button type="submit" class="submit-btn" data-i18n="tv.submit_button">Xem Lá Số</button>
+            </form>
+        </div>
+
+        <!-- DIST-3: Xem Hợp Tuổi — year-only compat (vs CMP = full birth chart) -->
+        <div class="compat-link-section" id="compat-link-section">
+            <a class="compat-link-btn" href="/hop-tuoi">
+                💕 <span data-i18n="tv.hop_tuoi_link">Xem Hợp Tuổi (chỉ cần năm sinh)</span>
+            </a>
+            <p class="compat-link-hint" data-i18n="tv.hop_tuoi_hint">Hợp tuổi vợ chồng · gia đình · làm ăn — chỉ cần năm sinh</p>
+        </div>
+
+        <!-- Chart Display -->
+        <div id="chart-container">
+            <div class="loading" data-i18n="tv.loading_msg">Nhập thông tin và bấm "Xem Lá Số" để xem kết quả</div>
+        </div>
+
+        <!-- Timeline Section -->
+        <div id="timeline-section" class="hidden">
+            <div class="timeline-section">
+                <h3 class="timeline-title">Đường Vận Mệnh</h3>
+                <div id="timeline" class="timeline"></div>
+                <div id="timeline-summary" class="timeline-summary hidden"></div>
+            </div>
+        </div>
+
+        <!-- TV-FP-2: Share Button -->
+        <div class="share-section hidden" id="share-section">
+            <button type="button" class="btn-share-chart" onclick="shareTuviChart()">
+                <span data-i18n="tv.share_button">✦ Chia sẻ lá số</span>
+            </button>
+        </div>
+
+        <!-- AI Interpretation Button -->
+        <div class="ai-section hidden" id="ai-section">
+            <button type="button" class="btn-ai-ornamental" id="btn-ai-interpret" onclick="interpretWithAI()">
+                <span data-i18n="tv.interpret_button">═══ Luận Giải Lá Số ═══</span>
+            </button>
+
+            <!-- English locale disclaimer -->
+            <div id="english-disclaimer" class="hidden" style="margin:0.75rem 0;padding:0.75rem 1rem;background:var(--surface-hover);border:1px solid var(--gold);border-radius:var(--radius-sm);font-size:0.875rem;color:var(--text-secondary);" data-i18n="tv.english_only_disclaimer">AI interpretation is available in Vietnamese only. Please switch to 🇻🇳.</div>
+            <div id="ai-interpret-panel" class="ai-interpret-panel hidden">
+                <div class="ai-interpret-header">
+                    <h3 style="font-family:var(--font-display);font-size:1.0625rem;color:var(--gold);">Luận Giải</h3>
+                    <span id="personalized-badge" class="personalized-badge hidden">✦ Đã cá nhân hóa</span>
+                    <button type="button" class="btn-close" onclick="closeAIPanel()">✕</button>
+                </div>
+                <div class="ai-interpret-content" id="ai-interpret-content">
+                    <div class="ai-loading-dots"><div class="ai-loading-dot"></div><div class="ai-loading-dot"></div><div class="ai-loading-dot"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LUẬN GIẢI LÁ SỐ -->
+        <div class="lg-section-wrapper hidden" id="lg-section">
+            <button type="button" class="lg-toggle-btn" onclick="toggleLuanGiai()">
+                ═══ Luận Giải Lá Số ═══
+            </button>
+            <div id="lg-panel" class="lg-panel hidden"></div>
+        </div>
+
+        <!-- CMP-2: Hợp Duyên Compatibility Section -->
+        <div class="cmp-section hidden" id="cmp-section">
+            <button type="button" class="btn-ai-ornamental" id="btn-cmp-open" onclick="toggleCompatibilitySection()">
+                <span data-i18n="tv.compat_button">═══ Hợp Duyên — Tình Duyên Tử Vi ═══</span>
+            </button>
+
+            <div id="cmp-panel" class="cmp-panel hidden">
+                <!-- Two-person form -->
+                <div class="cmp-persons-row">
+                    <!-- Person A -->
+                    <div class="cmp-person-card" id="cmp-person-a">
+                        <div class="cmp-person-label">Người A</div>
+                        <input class="cmp-input" id="cmp-a-name" type="text" placeholder="Họ và tên">
+                        <div class="cmp-date-row">
+                            <input class="cmp-input cmp-num" id="cmp-a-year"  type="number" placeholder="Năm" min="1900" max="2100">
+                            <input class="cmp-input cmp-num" id="cmp-a-month" type="number" placeholder="Tháng" min="1" max="12">
+                            <input class="cmp-input cmp-num" id="cmp-a-day"   type="number" placeholder="Ngày" min="1" max="31">
+                        </div>
+                        <select class="cmp-input" id="cmp-a-hour"></select>
+                        <div class="cmp-gender-row">
+                            <button type="button" class="cmp-gender-btn active" data-person="a" data-gender="nam" onclick="selectCompatibilityGender('a','nam')">☉ Nam</button>
+                            <button type="button" class="cmp-gender-btn"        data-person="a" data-gender="nu"  onclick="selectCompatibilityGender('a','nu')">☽ Nữ</button>
+                        </div>
+                    </div>
+
+                    <div class="cmp-vs-divider">❤</div>
+
+                    <!-- Person B -->
+                    <div class="cmp-person-card" id="cmp-person-b">
+                        <div class="cmp-person-label">Người B</div>
+                        <input class="cmp-input" id="cmp-b-name" type="text" placeholder="Họ và tên">
+                        <div class="cmp-date-row">
+                            <input class="cmp-input cmp-num" id="cmp-b-year"  type="number" placeholder="Năm" min="1900" max="2100">
+                            <input class="cmp-input cmp-num" id="cmp-b-month" type="number" placeholder="Tháng" min="1" max="12">
+                            <input class="cmp-input cmp-num" id="cmp-b-day"   type="number" placeholder="Ngày" min="1" max="31">
+                        </div>
+                        <select class="cmp-input" id="cmp-b-hour"></select>
+                        <div class="cmp-gender-row">
+                            <button type="button" class="cmp-gender-btn"        data-person="b" data-gender="nam" onclick="selectCompatibilityGender('b','nam')">☉ Nam</button>
+                            <button type="button" class="cmp-gender-btn active" data-person="b" data-gender="nu"  onclick="selectCompatibilityGender('b','nu')">☽ Nữ</button>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" class="cmp-submit-btn" id="cmp-submit-btn" onclick="submitCompatibility()">
+                    ✦ So Sánh Duyên Phận
+                </button>
+
+                <div id="cmp-loading" class="cmp-status hidden" data-i18n="tv.compat_loading">Đang tính toán...</div>
+                <div id="cmp-error"   class="cmp-status cmp-error hidden"></div>
+
+                <!-- Results -->
+                <div id="cmp-results" class="hidden">
+                    <!-- Score circle -->
+                    <div class="cmp-score-wrap">
+                        <div class="cmp-score-circle" id="cmp-score-circle">
+                            <span class="cmp-score-value" id="cmp-score-value"></span>
+                            <span class="cmp-score-label">/ 100</span>
+                        </div>
+                        <div class="cmp-score-rating" id="cmp-score-rating"></div>
+                    </div>
+
+                    <!-- 4 factor bars -->
+                    <div id="cmp-factors" class="cmp-factors">
+                        <div class="cmp-factor-bar" id="cmp-factor-ngu-hanh">
+                            <div class="cmp-factor-name">Ngũ Hành</div>
+                            <div class="cmp-factor-track"><div class="cmp-factor-fill"></div></div>
+                            <span class="cmp-factor-detail"></span>
+                        </div>
+                        <div class="cmp-factor-bar" id="cmp-factor-zodiac">
+                            <div class="cmp-factor-name">Địa Chi</div>
+                            <div class="cmp-factor-track"><div class="cmp-factor-fill"></div></div>
+                            <span class="cmp-factor-detail"></span>
+                        </div>
+                        <div class="cmp-factor-bar" id="cmp-factor-phu-the">
+                            <div class="cmp-factor-name">Cung Phu Thê</div>
+                            <div class="cmp-factor-track"><div class="cmp-factor-fill"></div></div>
+                            <span class="cmp-factor-detail"></span>
+                        </div>
+                        <div class="cmp-factor-bar" id="cmp-factor-menh">
+                            <div class="cmp-factor-name">Cung Mệnh</div>
+                            <div class="cmp-factor-track"><div class="cmp-factor-fill"></div></div>
+                            <span class="cmp-factor-detail"></span>
+                        </div>
+                    </div>
+
+                    <!-- LLM streaming analysis -->
+                    <div id="cmp-analysis-section" class="cmp-analysis-section">
+                        <div class="cmp-analysis-title">── Luận Giải Duyên Phận ──</div>
+                        <div id="cmp-analysis-content" class="cmp-analysis-content" aria-live="polite"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LN-2: Lưu Niên Forecast Section -->
+        <div class="ln-section hidden" id="ln-section">
+            <button type="button" class="btn-ai-ornamental" id="btn-ln-open" onclick="toggleLuuNienSection()">
+                <span data-i18n="tv.forecast_button">═══ Lưu Niên — Vận Hạn Năm ═══</span>
+            </button>
+
+            <div id="ln-panel" class="ln-panel hidden">
+                <!-- Year selector -->
+                <div class="ln-year-row">
+                    <button type="button" class="ln-year-btn" id="ln-year-prev" onclick="changeYear(-1)">&#8249;</button>
+                    <select class="ln-year-select" id="ln-year-select" onchange="onYearSelectChange()"></select>
+                    <button type="button" class="ln-year-btn" id="ln-year-next" onclick="changeYear(1)">&#8250;</button>
+                </div>
+
+                <!-- Year overview card -->
+                <div id="ln-overview" class="ln-overview hidden">
+                    <div class="ln-overview-title" id="ln-year-title"></div>
+                    <div class="ln-overview-meta">
+                        <span id="ln-nominal-age"></span>
+                        <span class="ln-sep">·</span>
+                        <span id="ln-menh-palace"></span>
+                    </div>
+                    <div class="ln-tuhoa-row" id="ln-tuhoa"></div>
+                </div>
+
+                <!-- Loading / error -->
+                <div id="ln-loading" class="ln-status hidden" data-i18n="tv.forecast_loading">Đang tải...</div>
+                <div id="ln-error" class="ln-status ln-error hidden"></div>
+
+                <!-- 12-month grid -->
+                <div class="ln-month-grid" id="ln-month-grid"></div>
+
+                <!-- Month detail panel -->
+                <div id="ln-month-detail" class="ln-month-detail hidden">
+                    <div class="ln-detail-header">
+                        <span id="ln-detail-title"></span>
+                        <button type="button" class="ln-detail-close" onclick="closeLuuNienDetail()">✕</button>
+                    </div>
+                    <div id="ln-detail-body"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Palace Detail Panel (desktop) -->
+        <div id="detail-overlay" class="detail-overlay"></div>
+        <div id="detail-panel" class="detail-panel">
+            <button type="button" class="detail-close" onclick="closeDetailPanel()">&times;</button>
+            <div id="detail-content"></div>
+        </div>
+
+        <!-- Bottom Sheet (mobile) -->
+        <div id="bottom-sheet-overlay" class="bottom-sheet-overlay" onclick="closeBottomSheet()"></div>
+        <div id="bottom-sheet" class="bottom-sheet">
+            <div class="bottom-sheet-handle"></div>
+            <div id="bottom-sheet-content"></div>
+        </div>
+
+        <!-- Profile Modal -->
+        <div id="profile-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;background:rgba(0,0,0,0.8);align-items:center;justify-content:center;padding:1rem;">
+            <div style="background:var(--surface,#18181B);border:1px solid rgba(201,169,98,0.5);border-radius:12px;padding:1.5rem;max-width:448px;width:100%;max-height:90vh;overflow-y:auto;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+                    <h3 class="font-display" style="font-size:1.25rem;font-weight:600;color:var(--gold);">Hồ Sơ Cá Nhân</h3>
+                    <button type="button" onclick="closeProfileModal()" style="background:none;border:none;cursor:pointer;font-size:1.25rem;color:var(--text-muted,#6B7280);">✕</button>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:1rem;">
+                    <div>
+                        <label style="display:block;font-size:0.8125rem;color:var(--text-muted);margin-bottom:0.5rem;">Tên của bạn</label>
+                        <input type="text" id="profile-name" style="width:100%;background:var(--bg-dark,#0C0C0E);border:1px solid var(--border);border-radius:8px;padding:0.75rem 1rem;color:var(--text-primary);font-family:var(--font-body);outline:none;" placeholder="Nhập tên (tùy chọn)">
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:0.8125rem;color:var(--text-muted);margin-bottom:0.5rem;">Ngày sinh</label>
+                        <input type="text" id="profile-birth-date" style="width:100%;background:var(--bg-dark,#0C0C0E);border:1px solid var(--border);border-radius:8px;padding:0.75rem 1rem;color:var(--text-primary);font-family:var(--font-body);outline:none;" placeholder="DD/MM/YYYY">
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:0.8125rem;color:var(--text-muted);margin-bottom:0.5rem;">Giới tính</label>
+                        <div style="display:flex;gap:0.5rem;">
+                            <button type="button" class="profile-gender-btn" data-gender="male" onclick="selectProfileGender('male')" style="flex:1;padding:0.75rem;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text-secondary);cursor:pointer;font-family:var(--font-body);">Nam</button>
+                            <button type="button" class="profile-gender-btn" data-gender="female" onclick="selectProfileGender('female')" style="flex:1;padding:0.75rem;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text-secondary);cursor:pointer;font-family:var(--font-body);">Nữ</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:0.8125rem;color:var(--text-muted);margin-bottom:0.5rem;">Quan tâm</label>
+                        <div style="display:flex;flex-wrap:wrap;gap:0.5rem;" id="profile-interests">
+                            <button type="button" class="interest-chip" data-interest="tinh_cam" onclick="toggleInterest('tinh_cam')">Tình Cảm</button>
+                            <button type="button" class="interest-chip" data-interest="su_nghiep" onclick="toggleInterest('su_nghiep')">Sự Nghiệp</button>
+                            <button type="button" class="interest-chip" data-interest="suc_khoe" onclick="toggleInterest('suc_khoe')">Sức Khỏe</button>
+                            <button type="button" class="interest-chip" data-interest="tai_chinh" onclick="toggleInterest('tai_chinh')">Tài Chính</button>
+                            <button type="button" class="interest-chip" data-interest="gia_dinh" onclick="toggleInterest('gia_dinh')">Gia Đình</button>
+                        </div>
+                    </div>
+                    <button type="button" onclick="saveProfile()" style="width:100%;background:var(--gold);color:var(--bg-dark);border:none;border-radius:8px;padding:0.875rem;font-family:var(--font-display);font-size:1rem;font-weight:600;cursor:pointer;margin-top:0.5rem;">Lưu Hồ Sơ</button>
+                    <div style="text-align:center;">
+                        <button type="button" onclick="deleteProfile()" style="background:none;border:none;font-size:0.8125rem;color:var(--text-muted);cursor:pointer;text-decoration:underline;">Xóa hồ sơ</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- .chart-container -->
+
+    <!-- TV-FP-2: Share Modal -->
+    <div id="tuvi-share-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9000;background:rgba(0,0,0,0.8);align-items:center;justify-content:center;padding:1rem;">
+        <div class="share-modal-box">
+            <div class="share-modal-header">
+                <h3 class="share-modal-title">Chia Sẻ Lá Số</h3>
+                <button type="button" class="share-modal-close" onclick="closeTuviShareModal()">✕</button>
+            </div>
+            <div id="tuvi-share-preview" class="share-modal-preview"></div>
+            <div class="share-modal-actions">
+                <button type="button" id="btn-tuvi-share-native" class="btn-share-primary" onclick="shareTuviNative()">
+                    ↗ Chia Sẻ Ngay
+                </button>
+                <button type="button" class="btn-share-secondary" onclick="downloadTuviImage()">
+                    ↓ Tải Về
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TV-FP-4: History Sidebar -->
+    <div class="tv-sidebar-overlay" id="tv-sidebar-overlay" onclick="closeSidebar()"></div>
+    <aside class="tv-sidebar" id="tv-sidebar">
+        <div class="tv-sidebar-header">
+            <span class="tv-sidebar-title">Lịch Sử</span>
+            <button type="button" class="tv-sidebar-close" onclick="closeSidebar()">✕</button>
+        </div>
+        <ul class="tv-history-list" id="tv-history-list">
+            <li class="tv-history-empty">Chưa có lịch sử</li>
+        </ul>
+        <div class="tv-sidebar-footer">
+            <button type="button" class="btn-clear-history" onclick="clearTuviHistory()">Xóa lịch sử</button>
+        </div>
+    </aside>
+
+    <script defer src="/shared/js/device-manager.js"></script>
+    <script defer src="/shared/js/markdown-renderer.js"></script>
+    <script defer src="/shared/js/stream-reader.js"></script>
+    <script defer src="/shared/js/utils.js"></script>
+    <script defer src="/shared/js/paywall.js"></script>
+    <script defer src="/static/js/tuvi-api.js?v=40"></script>
+    <script defer src="/static/js/tuvi-luan-giai.js?v=1"></script>
+    <script defer src="/static/js/tuvi-chart.js?v=61"></script>
+    <script defer src="/static/js/tuvi-daily.js?v=41"></script>
+    <script>
+        // Set năm xem mặc định = năm hiện tại
+        document.addEventListener('DOMContentLoaded', function() {
+            const el = document.getElementById('nam_xem');
+            if (el && !el.value) el.value = new Date().getFullYear();
+        });
+
+        // R1: Địa Chi hour selection
+        function selectHour(btn) {
+            document.querySelectorAll('.diachi-hour-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            document.getElementById('hour').value = btn.dataset.hour;
+        }
+
+        // R1: Gender pill selection
+        function selectGender(val) {
+            document.getElementById('pill-nam').classList.toggle('selected', val === 'nam');
+            document.getElementById('pill-nu').classList.toggle('selected', val === 'nu');
+            document.getElementById('gender-nam').checked = (val === 'nam');
+            document.getElementById('gender-nu').checked = (val === 'nu');
+        }
+
+        // R1: Form collapse / expand
+        function collapseForm() {
+            document.getElementById('form-container').classList.add('collapsed');
+            document.getElementById('btn-edit-info').classList.add('visible');
+        }
+
+        function expandForm() {
+            document.getElementById('form-container').classList.remove('collapsed');
+            document.getElementById('btn-edit-info').classList.remove('visible');
+        }
+
+        // R3: Bottom sheet
+        function openBottomSheet(html) {
+            document.getElementById('bottom-sheet-content').innerHTML = html;
+            document.getElementById('bottom-sheet').classList.add('open');
+            document.getElementById('bottom-sheet-overlay').classList.add('open');
+        }
+
+        function closeBottomSheet() {
+            document.getElementById('bottom-sheet').classList.remove('open');
+            document.getElementById('bottom-sheet-overlay').classList.remove('open');
+        }
+    </script>
+    <div id="badge-shelf" class="hidden"></div>
+    <script defer src="/shared/js/i18n.js"></script>
+    <script defer src="/shared/js/voice-input.js"></script>
+    <script defer src="/shared/js/onboarding.js"></script>
+    <script defer src="/shared/js/feedback.js"></script>
+    <script defer src="/shared/js/analytics.js"></script>
+    <script defer src="/shared/js/streak-manager.js"></script>
+</body>
+</html>

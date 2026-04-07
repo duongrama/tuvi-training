@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#C9A962">
+    <link rel="apple-touch-icon" href="/icon-192.png">
+    <title>Hợp Tuổi — Tử Vi</title>
+    <meta property="og:title" content="Hợp Tuổi — Tử Vi Bói Toán AI">
+    <meta property="og:description" content="Xem tương hợp giữa hai tuổi theo phong thủy và con giáp. Miễn phí.">
+    <meta property="og:image" content="/static/img/og-card.png">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="vi_VN">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/tuvi.css">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="/shared/favicon.ico">
+
+    <style>
+        /* ── hop-tuoi standalone page styles ── */
+        body {
+            min-height: 100vh;
+            background: var(--bg-dark, #0C0C0E);
+            color: var(--text-primary, #F5F0E8);
+            font-family: 'Montserrat', sans-serif;
+            padding: 1.5rem 1rem;
+        }
+
+        .ht-page {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .ht-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .ht-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gold, #C9A962);
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+
+        .ht-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-secondary, #9B9B9B);
+        }
+
+        /* Form section */
+        .ht-form-card {
+            background: var(--surface, #18181B);
+            border: 1px solid rgba(201,169,98,0.15);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .ht-persons-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .ht-vs-divider {
+            font-size: 1.25rem;
+            color: var(--gold, #C9A962);
+            flex-shrink: 0;
+        }
+
+        .ht-person-card {
+            flex: 1;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(201,169,98,0.1);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .ht-person-label {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--gold, #C9A962);
+            margin-bottom: 0.75rem;
+        }
+
+        .ht-input {
+            width: 100%;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(201,169,98,0.2);
+            border-radius: 6px;
+            padding: 0.5rem 0.75rem;
+            color: var(--text-primary, #F5F0E8);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+            box-sizing: border-box;
+        }
+
+        .ht-input::placeholder {
+            color: var(--text-muted, #666);
+        }
+
+        .ht-input:focus {
+            outline: none;
+            border-color: var(--gold, #C9A962);
+        }
+
+        .ht-input.error {
+            border-color: var(--error, #E57373);
+        }
+
+        .ht-year-input {
+            width: 100%;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(201,169,98,0.2);
+            border-radius: 6px;
+            padding: 0.5rem 0.75rem;
+            color: var(--text-primary, #F5F0E8);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.875rem;
+            box-sizing: border-box;
+            -moz-appearance: textfield;
+        }
+
+        .ht-year-input::-webkit-inner-spin-button,
+        .ht-year-input::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+        }
+
+        .ht-year-input:focus {
+            outline: none;
+            border-color: var(--gold, #C9A962);
+        }
+
+        .ht-year-error {
+            font-size: 0.7rem;
+            color: var(--error, #E57373);
+            margin-top: 0.25rem;
+            min-height: 1rem;
+        }
+
+        /* Context selector */
+        .ht-context-selector {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.25rem;
+            flex-wrap: wrap;
+        }
+
+        .ht-context-btn {
+            flex: 1;
+            min-width: calc(33.333% - 0.34rem);
+            padding: 0.5rem 0.25rem;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(201,169,98,0.2);
+            border-radius: 20px;
+            color: var(--text-secondary, #9B9B9B);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .ht-context-btn.active {
+            background: rgba(201,169,98,0.15);
+            border-color: var(--gold, #C9A962);
+            color: var(--gold, #C9A962);
+        }
+
+        .ht-context-btn:hover:not(.active) {
+            border-color: rgba(201,169,98,0.4);
+            color: var(--text-primary, #F5F0E8);
+        }
+
+        /* Submit button */
+        .ht-submit-btn {
+            width: 100%;
+            padding: 0.875rem;
+            background: linear-gradient(135deg, rgba(201,169,98,0.9), rgba(201,169,98,0.7));
+            border: none;
+            border-radius: 8px;
+            color: #0C0C0E;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .ht-submit-btn:hover {
+            background: linear-gradient(135deg, rgba(201,169,98,1), rgba(201,169,98,0.9));
+            transform: translateY(-1px);
+        }
+
+        .ht-submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .ht-submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Loading / Error states */
+        .ht-loading {
+            display: none;
+            text-align: center;
+            padding: 1rem;
+            color: var(--text-secondary, #9B9B9B);
+            font-size: 0.875rem;
+        }
+        .ht-loading.visible { display: block; }
+
+        .ht-loading::after {
+            content: '...';
+            animation: ht-dots 1s infinite;
+        }
+
+        @keyframes ht-dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        .ht-error {
+            display: none;
+            text-align: center;
+            padding: 0.75rem;
+            color: var(--error, #E57373);
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+        .ht-error.visible { display: block; }
+
+        /* ── Teaser Result ── */
+        .ht-teaser {
+            display: none;
+        }
+
+        .ht-teaser.visible {
+            display: block;
+        }
+
+        /* Zodiac pair */
+        .ht-zodiac-pair {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .ht-zodiac-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 2px solid rgba(201,169,98,0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(201,169,98,0.05);
+        }
+
+        .ht-zodiac-animal {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .ht-zodiac-year {
+            font-size: 0.65rem;
+            color: var(--text-secondary, #9B9B9B);
+        }
+
+        .ht-zodiac-vs {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.875rem;
+            color: var(--text-muted, #666);
+        }
+
+        /* Zodiac verdict badge */
+        .ht-zodiac-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin: 0 auto 1rem;
+            display: block;
+            text-align: center;
+            width: fit-content;
+        }
+
+        .ht-badge-tam_hop  { background: rgba(76,175,80,0.15); border: 1px solid rgba(76,175,80,0.4); color: #81C784; }
+        .ht-badge-luc_hop  { background: rgba(139,195,74,0.15); border: 1px solid rgba(139,195,74,0.4); color: #AED581; }
+        .ht-badge-luc_hai  { background: rgba(255,193,7,0.15); border: 1px solid rgba(255,193,7,0.4); color: #FFD54F; }
+        .ht-badge-trung_tinh { background: rgba(158,158,158,0.15); border: 1px solid rgba(158,158,158,0.4); color: #BDBDBD; }
+        .ht-badge-luc_xung { background: rgba(244,67,54,0.15); border: 1px solid rgba(244,67,54,0.4); color: #E57373; }
+
+        /* Element arrow */
+        .ht-element-arrow {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-secondary, #9B9B9B);
+            margin-bottom: 1rem;
+        }
+
+        /* Score circle */
+        .ht-score-wrap {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .ht-score-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid rgba(201,169,98,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.5rem;
+            background: rgba(201,169,98,0.05);
+        }
+
+        .ht-score-value {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gold, #C9A962);
+            line-height: 1;
+        }
+
+        .ht-score-label {
+            font-size: 0.7rem;
+            color: var(--text-muted, #666);
+        }
+
+        .ht-score-rating {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem;
+            color: var(--text-secondary, #9B9B9B);
+        }
+
+        /* Summary */
+        .ht-summary {
+            text-align: center;
+            font-size: 0.875rem;
+            color: var(--text-secondary, #9B9B9B);
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+            padding: 0 0.5rem;
+        }
+
+        /* CTA button */
+        .ht-cta-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+            padding: 0.875rem;
+            background: linear-gradient(135deg, rgba(201,169,98,0.2), rgba(201,169,98,0.1));
+            border: 1px solid rgba(201,169,98,0.3);
+            border-radius: 8px;
+            color: var(--gold, #C9A962);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 1rem;
+        }
+
+        .ht-cta-btn:hover {
+            background: linear-gradient(135deg, rgba(201,169,98,0.25), rgba(201,169,98,0.15));
+            border-color: rgba(201,169,98,0.5);
+        }
+
+        .ht-cta-lock {
+            font-size: 1rem;
+        }
+
+        /* Back button */
+        .ht-back-btn {
+            display: block;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted, #666);
+            text-decoration: none;
+            margin-top: 0.5rem;
+        }
+
+        .ht-back-btn:hover {
+            color: var(--text-secondary, #9B9B9B);
+        }
+
+        /* ── Invitation Modal ── */
+        /* Partner landing section */
+        #ht-partner-section { display: none; padding: 1rem; text-align: center; }
+        #ht-partner-section.visible { display: block; }
+
+        .ht-invite-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+        }
+
+        .ht-invite-modal.visible {
+            display: block;
+        }
+
+        /* Utility: hidden by default */
+        .hidden { display: none !important; }
+
+        /* COMP-4: Full report */
+        .ht-full-report {
+            display: none;
+            padding: 1.5rem;
+        }
+        .ht-full-report.visible {
+            display: block;
+        }
+        #ht-report-header h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            color: #C9A962;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .ht-report-section {
+            margin-bottom: 1.25rem;
+            line-height: 1.6;
+            color: rgba(255,255,255,0.85);
+        }
+        #ht-share-card {
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+        .ht-share-result-btn {
+            background: #C9A962;
+            color: #0a0a0a;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .ht-reentry-btn {
+            display: block;
+            margin: 1rem auto 0;
+            background: transparent;
+            border: 1px solid rgba(201,169,98,0.4);
+            color: rgba(201,169,98,0.7);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .ht-invite-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+        }
+
+        .ht-invite-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--surface, #18181B);
+            border: 1px solid rgba(201,169,98,0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            width: min(90vw, 400px);
+            max-width: 400px;
+        }
+
+        .ht-invite-close {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background: none;
+            border: none;
+            color: var(--text-muted, #666);
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .ht-invite-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+            color: var(--gold, #C9A962);
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .ht-invite-message {
+            width: 100%;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(201,169,98,0.2);
+            border-radius: 8px;
+            padding: 0.75rem;
+            color: var(--text-primary, #F5F0E8);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.8rem;
+            resize: none;
+            box-sizing: border-box;
+            margin-bottom: 1rem;
+        }
+
+        .ht-share-zalo {
+            width: 100%;
+            padding: 0.75rem;
+            background: #0068FF;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+        }
+
+        .ht-share-fb {
+            width: 100%;
+            padding: 0.75rem;
+            background: #0084FF;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+        }
+
+        .ht-copy-link {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(201,169,98,0.2);
+            border-radius: 8px;
+            color: var(--text-secondary, #9B9B9B);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.875rem;
+            cursor: pointer;
+            margin-bottom: 0.75rem;
+        }
+
+        .ht-skip-link {
+            display: block;
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-muted, #666);
+            text-decoration: none;
+            padding: 0.25rem;
+        }
+
+        .ht-skip-link:hover {
+            color: var(--text-secondary, #9B9B9B);
+        }
+
+        /* Mobile */
+        @media (max-width: 480px) {
+            .ht-persons-row {
+                flex-direction: column;
+            }
+            .ht-vs-divider {
+                align-self: center;
+            }
+            .ht-context-btn {
+                min-width: calc(50% - 0.25rem);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ht-page">
+        <!-- Header -->
+        <div class="ht-header">
+            <div class="ht-title">Hợp Tuổi</div>
+            <div class="ht-subtitle">Xem tương hợp giữa hai người</div>
+        </div>
+
+        <!-- Entry Form -->
+        <div id="ht-form-section" class="ht-form-card">
+            <div class="ht-persons-row">
+                <!-- Person A -->
+                <div class="ht-person-card" id="ht-person-a">
+                    <div class="ht-person-label">Người A</div>
+                    <input class="ht-input" id="ht-a-name" type="text" placeholder="Tên (tùy chọn)" maxlength="30">
+                    <input class="ht-year-input" id="ht-a-year" type="number" placeholder="Năm sinh" min="1940" max="2015">
+                    <div class="ht-year-error" id="ht-a-error"></div>
+                </div>
+
+                <div class="ht-vs-divider">❤</div>
+
+                <!-- Person B -->
+                <div class="ht-person-card" id="ht-person-b">
+                    <div class="ht-person-label">Người B</div>
+                    <input class="ht-input" id="ht-b-name" type="text" placeholder="Tên (tùy chọn)" maxlength="30">
+                    <input class="ht-year-input" id="ht-b-year" type="number" placeholder="Năm sinh" min="1940" max="2015">
+                    <div class="ht-year-error" id="ht-b-error"></div>
+                </div>
+            </div>
+
+            <!-- Context Selector -->
+            <div class="ht-context-selector" id="ht-context-selector">
+                <button type="button" class="ht-context-btn active" data-context="romance" id="ht-ctx-romance">💕 Tình Duyên</button>
+                <button type="button" class="ht-context-btn" data-context="family" id="ht-ctx-family">👨‍👩‍👧 Gia Đình</button>
+                <button type="button" class="ht-context-btn" data-context="business" id="ht-ctx-business">💼 Làm Ăn</button>
+            </div>
+
+            <!-- Submit -->
+            <button type="button" class="ht-submit-btn" id="ht-submit-btn" onclick="htSubmit()">Xem Hợp Tuổi</button>
+            <div class="ht-loading" id="ht-loading"></div>
+            <div class="ht-error" id="ht-error"></div>
+        </div>
+
+        <!-- Teaser Result -->
+        <div id="ht-teaser" class="ht-form-card ht-teaser">
+            <!-- Zodiac pair -->
+            <div class="ht-zodiac-pair">
+                <div class="ht-zodiac-circle">
+                    <div class="ht-zodiac-animal" id="ht-zodiac-a"></div>
+                    <div class="ht-zodiac-year" id="ht-zodiac-a-year"></div>
+                </div>
+                <div class="ht-zodiac-vs">vs</div>
+                <div class="ht-zodiac-circle">
+                    <div class="ht-zodiac-animal" id="ht-zodiac-b"></div>
+                    <div class="ht-zodiac-year" id="ht-zodiac-b-year"></div>
+                </div>
+            </div>
+
+            <!-- Zodiac verdict badge -->
+            <div class="ht-zodiac-badge" id="ht-zodiac-verdict-badge"></div>
+
+            <!-- Element arrow -->
+            <div class="ht-element-arrow" id="ht-element-arrow"></div>
+
+            <!-- Score circle -->
+            <div class="ht-score-wrap">
+                <div class="ht-score-circle">
+                    <div class="ht-score-value" id="ht-score-value"></div>
+                    <div class="ht-score-label">/ 50</div>
+                </div>
+                <div class="ht-score-rating" id="ht-score-rating"></div>
+            </div>
+
+            <!-- Summary -->
+            <div class="ht-summary" id="ht-summary"></div>
+
+            <!-- CTA -->
+            <button type="button" class="ht-cta-btn" id="ht-cta-btn" onclick="htOpenInvitationModal()">
+                <span>🔮</span>
+                <span>Xem phân tích AI chi tiết...</span>
+                <span class="ht-cta-lock">🔒</span>
+            </button>
+
+            <a href="/" class="ht-back-btn">← Quay lại lá số Tử Vi</a>
+        </div>
+    </div>
+
+    <!-- COMP-4: Full AI Report -->
+    <div id="ht-full-report" class="ht-form-card">
+        <div id="ht-report-header">
+            <h2>Phân Tích Chi Tiết</h2>
+        </div>
+        <div id="ht-report-streaming">
+            <div class="ht-report-section" id="ht-section-0"></div>
+            <div class="ht-report-section" id="ht-section-1"></div>
+            <div class="ht-report-section" id="ht-section-2"></div>
+            <div class="ht-report-section" id="ht-section-3"></div>
+            <div class="ht-report-section" id="ht-section-4"></div>
+        </div>
+        <div id="ht-share-card">
+            <button type="button" class="ht-share-result-btn" id="ht-share-card-btn">📸 Chia sẻ kết quả</button>
+        </div>
+        <button type="button" class="ht-reentry-btn" id="ht-reentry-btn">Xem hợp tuổi với người khác</button>
+    </div>
+
+    <!-- Invitation Modal -->
+    <div id="ht-invite-modal" class="ht-invite-modal">
+        <div class="ht-invite-backdrop" onclick="htCloseInviteModal()"></div>
+        <div class="ht-invite-content">
+            <button class="ht-invite-close" onclick="htCloseInviteModal()">✕</button>
+            <div class="ht-invite-title" id="ht-invite-header">Mời người kia cùng xem để mở khóa phân tích đầy đủ</div>
+            <textarea class="ht-invite-message" id="ht-invite-message" rows="3" readonly></textarea>
+            <button type="button" class="ht-share-zalo" id="ht-share-zalo-btn" onclick="htShareZalo()">💬 Chia sẻ qua Zalo</button>
+            <button type="button" class="ht-share-fb" id="ht-share-fb-btn" onclick="htShareMessenger()">📱 Chia sẻ qua Messenger</button>
+            <button type="button" class="ht-copy-link" id="ht-copy-link-btn" onclick="htCopyLink()">📋 Copy Link</button>
+            <a href="#" class="ht-skip-link" id="ht-skip-link">Bỏ qua — xem ngay</a>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script defer src="/shared/js/device-manager.js"></script>
+    <script defer src="/shared/js/i18n.js"></script>
+    <script defer src="/static/js/hop-tuoi.js"></script>
+    <script>
+        // Zalo share SDK
+        function htShareZalo() {
+            const link = document.getElementById('ht-invite-message')?.value || '';
+            window.open('https://zalo.me/share?url=' + encodeURIComponent(link), '_blank', 'width=600,height=400');
+        }
+
+        function htShareMessenger() {
+            const link = document.getElementById('ht-invite-message')?.value || '';
+            window.open('fb-messenger://share?link=' + encodeURIComponent(link), '_blank');
+        }
+
+        function htCopyLink() {
+            const link = document.getElementById('ht-invite-message')?.value || '';
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(link).then(() => {
+                    const btn = document.getElementById('ht-copy-link-btn');
+                    if (btn) {
+                        btn.textContent = '✅ Đã copy!';
+                        setTimeout(() => { if (btn) btn.textContent = '📋 Copy Link'; }, 2000);
+                    }
+                }).catch(() => {
+                    alert('Không thể copy link');
+                });
+            }
+        }
+
+    </script>
+    <script defer src="/shared/js/analytics.js"></script>
+</body>
+</html>

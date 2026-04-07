@@ -1,0 +1,25 @@
+{
+    "name": "Tử Vi Lá Số",
+    "short_name": "Tử Vi",
+    "description": "Xem lá số tử vi - Vận mệnh · Tài lộc · Tình duyên",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0C0C0E",
+    "theme_color": "#C9A962",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "categories": ["lifestyle", "entertainment"],
+    "lang": "vi",
+    "dir": "ltr"
+}
